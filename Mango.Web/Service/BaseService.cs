@@ -1,24 +1,44 @@
-﻿using Mango.Web.Models;
+using System.Net;
+using Mango.Web.Models;
+using Mango.Web.Service.IService;
 using Mango.Web.Utility;
+using Newtonsoft.Json;
 
 namespace Mango.Web.Service
 {
     public class BaseService : IService.IBaseService
     {
         private readonly IHttpClientFactory _httpClient;
+        private readonly ITokenProvider _tokenProvider;
 
-        public BaseService(IHttpClientFactory httpClient)
+        public BaseService(IHttpClientFactory httpClient, ITokenProvider tokenProvider)
         {
             _httpClient = httpClient;
+            _tokenProvider = tokenProvider;
         }
 
-        public async Task<ResponseDto?> SendAsync(RequestDto requestDto)
+        public async Task<ResponseDto?> SendAsync(RequestDto requestDto, bool withBearer = true)
         {
             try
             {
                 HttpClient httpClient = _httpClient.CreateClient("MangoAPI");
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 httpRequestMessage.Headers.Add("Accept", "application/json");
+
+                // Token
+                if (withBearer)
+                {
+                    var token = _tokenProvider.GetToken();
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        httpRequestMessage.Headers.Add("Authorization", $"Bearer {token}");
+                    }
+                }
+                else if (!string.IsNullOrEmpty(requestDto.AccessToken))
+                {
+                    httpRequestMessage.Headers.Add("Authorization", $"Bearer {requestDto.AccessToken}");
+                }
+
                 httpRequestMessage.RequestUri = new Uri(requestDto.Url);
                 httpRequestMessage.Method = requestDto.ApiType switch
                 {
@@ -31,15 +51,28 @@ namespace Mango.Web.Service
                 if (requestDto.Data != null)
                 {
                     httpRequestMessage.Content = new StringContent(
-                        System.Text.Json.JsonSerializer.Serialize(requestDto.Data),
+                        JsonConvert.SerializeObject(requestDto.Data),
                         System.Text.Encoding.UTF8,
                         "application/json"
                     );
                 }
                 HttpResponseMessage response = await httpClient.SendAsync(httpRequestMessage);
-                string apiResponse = await response.Content.ReadAsStringAsync();
-                ResponseDto? responseDto = System.Text.Json.JsonSerializer.Deserialize<ResponseDto>(apiResponse);
-                return responseDto;
+
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.NotFound:
+                        return new() { IsSuccess = false, Message = "Not Found" };
+                    case HttpStatusCode.Forbidden:
+                        return new() { IsSuccess = false, Message = "Access Denied" };
+                    case HttpStatusCode.Unauthorized:
+                        return new() { IsSuccess = false, Message = "Unauthorized" };
+                    case HttpStatusCode.InternalServerError:
+                        return new() { IsSuccess = false, Message = "Internal Server Error" };
+                    default:
+                        string apiResponse = await response.Content.ReadAsStringAsync();
+                        ResponseDto? responseDto = JsonConvert.DeserializeObject<ResponseDto>(apiResponse);
+                        return responseDto;
+                }
             }
             catch (Exception ex)
             {

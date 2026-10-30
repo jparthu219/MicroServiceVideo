@@ -17,6 +17,10 @@
       {
         "Path": "Mango.Service.ProductAPI\\Mango.Service.ProductAPI.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "Mango.Services.ShoppingCartAPI\\Mango.Services.ShoppingCartAPI.csproj",
+        "Action": "Start"
       }
     ]
   }
