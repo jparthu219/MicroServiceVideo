@@ -1,0 +1,62 @@
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.launchLaunch.user
+*.slnLaunch.user
+
+## Visual Studio Code
+.vscode/
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## Auto-generated & Cache files
+*.cache
+*.intermediate
+*.tmp
+*.temp
+.dtbcache*
+
+## Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+
+## Publish / Deploy
+publish/
+*.azurePubxml
+*.pubxml
+*.publishproj
+
+## OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
