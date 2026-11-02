@@ -4,6 +4,7 @@ using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Extensions;
 using Mango.Services.ShoppingCartAPI.Service;
 using Mango.Services.ShoppingCartAPI.Service.IService;
+using Mango.Services.ShoppingCartAPI.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -21,11 +22,16 @@ builder.Services.AddSingleton(mapper);
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthenticationHttpClientHandler>();
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress =
-    new Uri(builder.Configuration["ServiceUrls:ProductAPI"] ?? "https://localhost:7003"));
+    new Uri(builder.Configuration["ServiceUrls:ProductAPI"] ?? "https://localhost:7003"))
+    .AddHttpMessageHandler<AuthenticationHttpClientHandler>();
+
 builder.Services.AddHttpClient("Coupon", u => u.BaseAddress =
-    new Uri(builder.Configuration["ServiceUrls:CouponAPI"] ?? "https://localhost:7001"));
+    new Uri(builder.Configuration["ServiceUrls:CouponAPI"] ?? "https://localhost:7001"))
+    .AddHttpMessageHandler<AuthenticationHttpClientHandler>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
